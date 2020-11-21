@@ -50,12 +50,12 @@ public class ScheduleHeadLine implements SchedulerInterface {
             @Override
             public void run() {
                 try {
-                    log.info("nate NEWS HOME HEDLINE AREA schedule START =================================================================");
+                    log.info("NATE NEWS HOME HEDLINE AREA schedule START =================================================================");
                     long beforeTime = System.currentTimeMillis(); //코드 실행 전에 시간 받아오기
                     crwMain.startHeadLineCrw();
                     long afterTime = System.currentTimeMillis(); // 코드 실행 후에 시간 받아오기
                     log.info("HEADLINE 소요 시간  :: {} 초" , (afterTime - beforeTime)/1000 );
-                    log.info("nate NEWS HOME HEDLINE AREA schedule END =================================================================");
+                    log.info("NATE NEWS HOME HEDLINE AREA schedule END =================================================================");
                 } catch (EmptySourceInfoException e) {
                     e.printStackTrace();
                 } catch (CrwErrorException e) {
@@ -65,14 +65,16 @@ public class ScheduleHeadLine implements SchedulerInterface {
         }, new Trigger() {
             @Override
             public Date nextExecutionTime(TriggerContext triggerContext) {
-                String cron = "0 0/5 * * * *";
+                log.info("SELECT HEADLINE SCHEDULE VALUE =================================================================");
                 Source src  = srcRepository.findBySiteNmAndArticleCategoryAndUseYn(SiteName.NATE.name(), ArticleCate.HEADLINE.name(), "Y");
                 if(src != null){
-                    cron = src.getCrwCycle();
+                    String cron = src.getCrwCycle();
                     log.info("update HEADLINE cron value :: {}" , cron);
+                    log.info("========================================================================================");
                     return new CronTrigger(cron).nextExecutionTime(triggerContext);
                 }else{
-                    return new CronTrigger(cron).nextExecutionTime(triggerContext);
+                    log.info("========================================================================================");
+                    return null;
                 }
             }
         });

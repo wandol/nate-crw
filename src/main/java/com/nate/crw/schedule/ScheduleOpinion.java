@@ -51,16 +51,15 @@ public class ScheduleOpinion implements SchedulerInterface {
             public void run() {
                 try {
                     /**
-                     *  네이버 오피니언 속보 페이징 부분 하루치 기사 수집.
-                     *  00:00 시에 시작하여 어제 날짜에 해당 하는 칼럼 수집.
+                     *  네이트 칼럼 페이징 부분 하루치 기사 수집.
                      */
 
-                    log.info("nate OPINION PAGING AREA schedule START =================================================================");
+                    log.info("NATE OPINION PAGING AREA schedule START =================================================================");
                     long beforeTime = System.currentTimeMillis();
                     crwMain.startOpiPageCrw();
                     long afterTime = System.currentTimeMillis();
                     log.info("OPINION 소요 시간  :: {} 초" , (afterTime - beforeTime)/1000 );
-                    log.info("nate OPINION PAGING AREA schedule END =================================================================");
+                    log.info("NATE OPINION PAGING AREA schedule END =================================================================");
 
                 } catch (EmptySourceInfoException e) {
                     e.printStackTrace();
@@ -71,12 +70,15 @@ public class ScheduleOpinion implements SchedulerInterface {
         }, new Trigger() {
             @Override
             public Date nextExecutionTime(TriggerContext triggerContext) {
+                log.info("SELECT OPINION SCHEDULE VALUE =================================================================");
                 Source src  = srcRepository.findBySiteNmAndArticleCategoryAndUseYn(SiteName.NATE.name(), ArticleCate.OPINION.name(), "Y");
                 if(src != null){
                     String cron = src.getCrwCycle();
                     log.info("update OPINION cron value :: {}" , cron);
+                    log.info("========================================================================================");
                     return new CronTrigger(cron).nextExecutionTime(triggerContext);
                 }else{
+                    log.info("========================================================================================");
                     return null;
                 }
             }

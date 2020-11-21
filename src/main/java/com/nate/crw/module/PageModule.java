@@ -1,6 +1,8 @@
 package com.nate.crw.module;
 
 import com.nate.crw.domain.Source;
+import com.nate.crw.dto.ErrorDto;
+import com.nate.crw.dto.SiteName;
 import com.nate.crw.exception.CrwErrorException;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
@@ -48,7 +50,7 @@ public class PageModule {
 
         //  어제 날짜 'yyyyMMdd' 형식
         String yesterday = LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1).format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        String addDateParam  = "&regDate=" + yesterday;
+        String addDateParam  = "&date=" + yesterday;
         String crwUrl = src.getStartUrl();
 
         //  어제 날짜를 구해 'yyyymmdd' url 파라미터로 추가한다.
@@ -67,7 +69,7 @@ public class PageModule {
                 List<WebElement> pageLinkList = wb.findElements(By.xpath(src.getCatePagingListXpath()));
 
                 //  pageLinkList  사이즈가 20 이 아니면 수집 종료
-                if(pageLinkList.size() != 15) stopFlag = false;
+                if(pageLinkList.size() != 20) stopFlag = false;
                 //  해당 url에 목록이 없으면 수집종료.
                 if(pageLinkList.size() == 0) break;
 
@@ -87,7 +89,10 @@ public class PageModule {
         } catch (Exception e) {
             e.printStackTrace();
             wb.quit();
-            throw new CrwErrorException("정치 홈 페이징 기사 수집 에러. {}", e);
+            throw new CrwErrorException(ErrorDto.builder()
+                    .errorMsg(e.getMessage())
+                    .errorArticleCate(src.getArticleCategory())
+                    .errorSiteNm(SiteName.NATE.name()).build());
         }finally {
             wb.quit();
         }

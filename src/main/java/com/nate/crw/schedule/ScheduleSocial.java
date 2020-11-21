@@ -51,18 +51,17 @@ public class ScheduleSocial implements SchedulerInterface {
             public void run() {
                 try {
                     /**
-                     *  네이버 사회 홈 페이징 부분 하루치 기사 수집.
-                     *  00:00 시에 시작하여 목록 부분에 '1일전' 이라는 글씨를 만나기 전까지 수집.
+                     *  네이트 사회 홈 페이징 부분 하루치 기사 수집.
                      * @throws EmptySourceInfoException
                      * @throws CrwErrorException
                      */
 
-                    log.info("nate SOCIAL PAGING AREA schedule START =================================================================");
+                    log.info("NATE SOCIAL PAGING AREA schedule START =================================================================");
                     long beforeTime = System.currentTimeMillis();
                     crwMain.startSocPageCrw();
                     long afterTime = System.currentTimeMillis();
                     log.info("SOCIAL 소요 시간  :: {} 초" , (afterTime - beforeTime)/1000 );
-                    log.info("nate SOCIAL PAGING AREA schedule END =================================================================");
+                    log.info("NATE SOCIAL PAGING AREA schedule END =================================================================");
 
                 } catch (EmptySourceInfoException e) {
                     e.printStackTrace();
@@ -73,13 +72,15 @@ public class ScheduleSocial implements SchedulerInterface {
         }, new Trigger() {
             @Override
             public Date nextExecutionTime(TriggerContext triggerContext) {
-                String cron = "* * * * * *";
+                log.info("SELECT SOCIAL SCHEDULE VALUE =================================================================");
                 Source src  = srcRepository.findBySiteNmAndArticleCategoryAndUseYn(SiteName.NATE.name(), ArticleCate.SOCIAL.name(), "Y");
                 if(src != null){
-                    cron = src.getCrwCycle();
+                    String cron = src.getCrwCycle();
                     log.info("update SOCIAL cron value :: {}" , cron);
+                    log.info("========================================================================================");
                     return new CronTrigger(cron).nextExecutionTime(triggerContext);
                 }else{
+                    log.info("========================================================================================");
                     return null;
                 }
             }

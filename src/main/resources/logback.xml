@@ -7,12 +7,12 @@
         </encoder>
     </appender>
     <appender name="ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOGS_ABSOLUTE_PATH}/daum-crw.log</file>
+        <file>${LOGS_ABSOLUTE_PATH}/nate-crw.log</file>
         <encoder>
             <pattern>[%d{yyyy-MM-dd HH:mm:ss}:%-3relative][%thread] %-5level %logger{35} - %msg%n</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOGS_ABSOLUTE_PATH}/daum-crw.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>${LOGS_ABSOLUTE_PATH}/nate-crw.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy                  class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <!-- or whenever the file size reaches 100MB -->
                 <maxFileSize>50MB</maxFileSize>
@@ -21,7 +21,7 @@
         </rollingPolicy>
     </appender>
 
-    <logger name="com.daum.crw"  level="info">
+    <logger name="com.nate.crw"  level="info">
         <appender-ref ref="ROLLING" />
     </logger>
     <root level="info">

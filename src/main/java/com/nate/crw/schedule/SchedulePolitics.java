@@ -51,15 +51,14 @@ public class SchedulePolitics implements SchedulerInterface {
             public void run() {
                 try {
                     /**
-                     *  네이버 정치 홈 페이징 부분 하루치 기사 수집
-                     *  00:00 시에 시작하여 목록 부분에 '1일전' 이라는 글씨를 만나기 전까지 수집.
+                     *  네이트 정치 홈 페이징 부분 하루치 기사 수집
                      */
-                    log.info("nate POLITICS PAGING AREA schedule START =================================================================");
+                    log.info("NATE POLITICS PAGING AREA schedule START =================================================================");
                     long beforeTime = System.currentTimeMillis();
                     crwMain.startPolPageCrw();
                     long afterTime = System.currentTimeMillis();
                     log.info("POLITICS 소요 시간  :: {} 초" , (afterTime - beforeTime)/1000 );
-                    log.info("nate POLITICS PAGING AREA schedule END =================================================================");
+                    log.info("NATE POLITICS PAGING AREA schedule END =================================================================");
                 } catch (EmptySourceInfoException e) {
                     e.printStackTrace();
                 } catch (CrwErrorException e) {
@@ -69,13 +68,15 @@ public class SchedulePolitics implements SchedulerInterface {
         }, new Trigger() {
             @Override
             public Date nextExecutionTime(TriggerContext triggerContext) {
-                String cron = "* * * * * *";
+                log.info("SELECT POLITICS SCHEDULE VALUE =================================================================");
                 Source src  = srcRepository.findBySiteNmAndArticleCategoryAndUseYn(SiteName.NATE.name(), ArticleCate.POLITICS.name(), "Y");
                 if(src != null){
-                    cron = src.getCrwCycle();
+                    String cron = src.getCrwCycle();
                     log.info("update POLITICS cron value :: {}" , cron);
+                    log.info("========================================================================================");
                     return new CronTrigger(cron).nextExecutionTime(triggerContext);
                 }else{
+                    log.info("========================================================================================");
                     return null;
                 }
             }

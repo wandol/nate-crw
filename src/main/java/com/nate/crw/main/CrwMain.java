@@ -4,6 +4,7 @@ package com.nate.crw.main;
 import com.nate.crw.domain.Source;
 import com.nate.crw.dto.ArticleArea;
 import com.nate.crw.dto.ArticleCate;
+import com.nate.crw.dto.ErrorDto;
 import com.nate.crw.dto.SiteName;
 import com.nate.crw.exception.CrwErrorException;
 import com.nate.crw.exception.EmptySourceInfoException;
@@ -30,7 +31,7 @@ public class CrwMain {
     private PageModule pageModule;
 
     /**
-     *  다음 메인 홈 뉴스 헤드라인 뉴스 3개 영역 수집.
+     *  네이트 메인 홈 뉴스 3개 영역 수집.
      *  영역이 ajax으로 불러 오기에 2번 클릭 적용.
      *
      * @throws EmptySourceInfoException
@@ -42,9 +43,13 @@ public class CrwMain {
         Source src = headLineService.findBySiteNmAndArticleCategoryAndUseYn(SiteName.NATE.name(), ArticleCate.HEADLINE.name(),"Y");
 
         if (src == null) {
-            throw new EmptySourceInfoException(" 수집원이 없습니다. ");
+            throw new EmptySourceInfoException(ErrorDto.builder()
+                    .errorArticleCate(ArticleCate.HEADLINE.name())
+                    .errorMsg("수집원을 찾지 못했습니다.")
+                    .errorSiteNm(SiteName.NATE.name())
+                    .build());
         }
-        log.info("nate HEADLINE SOURCE INFO :: {}" , src);
+        log.info("NATE HEADLINE SOURCE INFO :: {}" , src);
 
         //  TODO 다음 뉴스 홈 헤드라인,정치,사회 영역 link 수집
         List<String> newsHomHeadLineLinkList = headLineModule.getHeadLineLink(src);
@@ -67,9 +72,13 @@ public class CrwMain {
         Source src = headLineService.findBySiteNmAndArticleCategoryAndUseYn(SiteName.NATE.name(), ArticleCate.POLITICS.name(), "Y");
 
         if (src == null) {
-            throw new EmptySourceInfoException(" 수집원이 없습니다. ");
+            throw new EmptySourceInfoException(ErrorDto.builder()
+                    .errorArticleCate(ArticleCate.POLITICS.name())
+                    .errorMsg("수집원을 찾지 못했습니다.")
+                    .errorSiteNm(SiteName.NATE.name())
+                    .build());
         }
-        log.info("nate POLITICS SOURCE INFO :: {}" , src.toString());
+        log.info("NATE POLITICS SOURCE INFO :: {}" , src.toString());
 
         //  todo 오늘 날짜에 생성된 기사만 페이징 처리하여 link 수집.
         List<String> urlList = pageModule.getPagingParamDateGetUrl(src);
@@ -92,9 +101,13 @@ public class CrwMain {
         Source src = headLineService.findBySiteNmAndArticleCategoryAndUseYn(SiteName.NATE.name(), ArticleCate.SOCIAL.name(), "Y");
 
         if (src == null) {
-            throw new EmptySourceInfoException(" 수집원이 없습니다. ");
+            throw new EmptySourceInfoException(ErrorDto.builder()
+                    .errorArticleCate(ArticleCate.SOCIAL.name())
+                    .errorMsg("수집원을 찾지 못했습니다.")
+                    .errorSiteNm(SiteName.NATE.name())
+                    .build());
         }
-        log.info("nate SOCIAL SOURCE INFO :: {}" , src.toString());
+        log.info("NATE SOCIAL SOURCE INFO :: {}" , src.toString());
 
         //  todo 어제 날짜에 생성된 기사만 페이징 처리하여 link 수집.
         List<String> urlList = pageModule.getPagingParamDateGetUrl(src);
@@ -116,9 +129,13 @@ public class CrwMain {
         Source src = headLineService.findBySiteNmAndArticleCategoryAndUseYn(SiteName.NATE.name(), ArticleCate.OPINION.name(), "Y");
 
         if (src == null) {
-            throw new EmptySourceInfoException(" 수집원이 없습니다. ");
+            throw new EmptySourceInfoException(ErrorDto.builder()
+                    .errorArticleCate(ArticleCate.OPINION.name())
+                    .errorMsg("수집원을 찾지 못했습니다.")
+                    .errorSiteNm(SiteName.NATE.name())
+                    .build());
         }
-        log.info("nate OPINION SOURCE INFO :: {}" , src.toString());
+        log.info("NATE OPINION SOURCE INFO :: {}" , src.toString());
 
         //  todo 오피니언 속보 영역 페이징 부분 페이징 처리 하여 LINK 수집
         List<String> urlList = pageModule.getPagingParamDateGetUrl(src);

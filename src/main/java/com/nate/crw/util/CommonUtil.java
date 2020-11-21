@@ -66,12 +66,12 @@ public class CommonUtil {
 	* @Discript	날짜 포멧 변경 및 체크.
 	* @return 	LocalDateTime
 	*/
-	public LocalDateTime checkDate(String writeDtTag) {
+	public LocalDateTime checkDate(String writeDtTag,String formatString) {
 		
 		//  기사 작성일 parse
         //  디폴트 값을 설정해놓음. properties
         //  기사 작성일 간혹 수정일이 포함되어 옴. ( 이에 배열 첫번째 요소로 parse )
-        DateFormat dateParser = new SimpleDateFormat("yyyyMMddHHmmss", Locale.ENGLISH);
+        DateFormat dateParser = new SimpleDateFormat(formatString, Locale.ENGLISH);
         LocalDateTime regDt = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
 
         try {

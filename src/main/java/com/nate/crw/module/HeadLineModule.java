@@ -3,6 +3,7 @@ package com.nate.crw.module;
 import com.nate.crw.domain.Contents;
 import com.nate.crw.domain.Source;
 import com.nate.crw.dto.ArticleArea;
+import com.nate.crw.dto.ErrorDto;
 import com.nate.crw.dto.SiteName;
 import com.nate.crw.exception.CrwErrorException;
 import com.nate.crw.service.HeadLineService;
@@ -49,7 +50,7 @@ public class HeadLineModule {
 
     /**
      *
-     *  다음 홈 에 있는 뉴스 영역 3가지 수집.
+     *  네이트 홈 에 있는 뉴스 영역 3가지 수집.
      *  탭 클릭 이벤트 추가.
      *  각 탭별로 link 수집.
      *
@@ -67,50 +68,48 @@ public class HeadLineModule {
         options.addArguments("headless");
 
         WebDriver driver = new ChromeDriver(options);
-        driver.manage().window().maximize();
         driver.navigate().to(src.getStartUrl());
-        WebDriverWait wait;
 
         try {
 
-            By container = By.cssSelector("#news");
-            wait = new WebDriverWait(driver, 5);
-            wait.until(ExpectedConditions.presenceOfElementLocated(container));
+            WebElement tabCnt = driver.findElement(By.xpath("//*[@id='newsMoreArea']/em"));
+            log.info("tabCnt :: {}", tabCnt.getText());
 
-            WebElement tap1 = driver.findElement(By.className("wrap_news"));
-            wait.until(ExpectedConditions.visibilityOf(tap1));
-            List<WebElement> tap1_one = tap1.findElements(By.xpath(src.getHomeHeadlineImgLinkXpth()));
-            tap1_one.forEach(v -> log.debug("tap1_one :: {}" , v.getAttribute("href")));
-            tap1_one.forEach(v -> result.add(v.getAttribute("href")));
-            List<WebElement> tap1_two = tap1.findElements(By.xpath(src.getHomeHeadlineListLinkXpth()));
-            tap1_two.forEach(v -> log.debug( "tap1_two :: {}" ,v.getAttribute("href")));
-            tap1_two.forEach(v -> result.add(v.getAttribute("href")));
+            if("2".equals(tabCnt.getText())){
+                driver.findElement(By.xpath("//*[@id='newsOptBtn']/button[2]")).click();
+                Thread.sleep(1000);
+            }else if("3".equals(tabCnt.getText())){
+                driver.findElement(By.xpath("//*[@id='newsOptBtn']/button[2]")).click();
+                Thread.sleep(1000);
+                driver.findElement(By.xpath("//*[@id='newsOptBtn']/button[2]")).click();
+                Thread.sleep(1000);
+            }
 
-            driver.findElement(By.id("mediaNextBtn")).click();
+            WebElement startCnt = driver.findElement(By.xpath("//*[@id='newsMoreArea']/em"));
+            log.info("startCnt :: {}", startCnt.getText());
+
+            List<WebElement> linkList = driver.findElements(By.xpath(src.getHomeHeadlineListLinkXpth()));
+            linkList.forEach(v -> result.add(v.getAttribute("href")));
+
+            driver.findElement(By.xpath("//*[@id='newsOptBtn']/button[3]")).click();
             Thread.sleep(1000);
 
-            WebElement tap2 = driver.findElement(By.className("wrap_news"));
-            wait.until(ExpectedConditions.visibilityOf(tap2));
-            List<WebElement> tap2_one = tap1.findElements(By.xpath(src.getHomePoliticsImgLinkXpth()));
-            tap2_one.forEach(v -> log.debug("tap2_one :: {}" , v.getAttribute("href")));
-            tap2_one.forEach(v -> result.add(v.getAttribute("href")));
-            List<WebElement> tap2_two = tap1.findElements(By.xpath(src.getHomePoliticsListLinkXpth()));
-            tap2_two.forEach(v -> log.debug( "tap2_two :: {}" ,v.getAttribute("href")));
-            tap2_two.forEach(v -> result.add(v.getAttribute("href")));
+            List<WebElement> linkList2 = driver.findElements(By.xpath(src.getHomeHeadlineListLinkXpth()));
+            linkList2.forEach(v -> result.add(v.getAttribute("href")));
 
-            driver.findElement(By.id("mediaNextBtn")).click();
+            driver.findElement(By.xpath("//*[@id='newsOptBtn']/button[3]")).click();
             Thread.sleep(1000);
 
-            WebElement tap3 = driver.findElement(By.className("wrap_news"));
-            wait.until(ExpectedConditions.visibilityOf(tap2));
-            List<WebElement> tap3_one = tap1.findElements(By.xpath(src.getHomeSocialListLinkXpth()));
-            tap3_one.forEach(v -> log.debug("tap3_one :: {}" , v.getAttribute("href")));
-            tap3_one.forEach(v -> result.add(v.getAttribute("href")));
+            List<WebElement> linkList3 = driver.findElements(By.xpath(src.getHomeHeadlineListLinkXpth()));
+            linkList3.forEach(v -> result.add(v.getAttribute("href")));
 
         } catch (Exception e) {
             e.printStackTrace();
             driver.quit();
-            throw new CrwErrorException("nate HOME HEADLINE LINK 수집 에러. {}", e);
+            throw new CrwErrorException(ErrorDto.builder()
+                    .errorMsg(e.getMessage())
+                    .errorArticleCate(src.getArticleCategory())
+                    .errorSiteNm(SiteName.NATE.name()).build());
         }finally {
             driver.quit();
         }
@@ -152,15 +151,15 @@ public class HeadLineModule {
                 if(contents == null){
                     Contents cont = Contents.builder()
                             .articleCategory(doc.select(src.getArticleCateXpth()).text())
-                            .articleContents(doc.getElementsByClass(src.getArticleContXpth()).text())
+                            .articleContents(doc.getElementById(src.getArticleContXpth()).text())
                             .articleImgCaption(doc.getElementsByClass(src.getArticleImgContXpth()).stream().map(v -> v.text()).collect(Collectors.joining("|")))
-                            .articleMediaNm(doc.select(src.getArticleMediaNmXpth()).attr("alt"))
+                            .articleMediaNm(doc.select(src.getArticleMediaNmXpth()).text())
                             // 해당 제목과 url의 텍스트를 합쳐서 md5를 구하고 pk로 함.
                             .articlePk(pk_v)
                             .articleTitle(doc.getElementsByAttributeValue("property",src.getArticleTitleXpth()).attr("content"))
                             .articleUrl(url)
-                            .articleWriteDt(new CommonUtil().checkDate(doc.getElementsByAttributeValue("property",src.getArticleWriteDtXpth()).attr("content")))
-                            .articleWriter(new CommonUtil().checkWriter(doc.select(src.getArticleWriterXpth()).text()))
+                            .articleWriteDt(new CommonUtil().checkDate(doc.select(src.getArticleWriteDtXpth()).text(),"yyyy-MM-dd HH:mm"))
+                            .articleWriter(doc.select(src.getArticleWriterXpth()).text())
                             .siteNm(SiteName.NATE.name())
                             .srcType(area.name())
                             .delYn("N")
@@ -192,7 +191,10 @@ public class HeadLineModule {
 
         } catch (Exception e) {
             e.printStackTrace();
-            throw new CrwErrorException("상세 기사 수집 에러. {}" , e );
+            throw new CrwErrorException(ErrorDto.builder()
+                    .errorMsg(e.getMessage())
+                    .errorArticleCate(src.getArticleCategory())
+                    .errorSiteNm(SiteName.NATE.name()).build());
         }
     }
 }
