@@ -7,8 +7,10 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
+import org.jsoup.nodes.Document;
 
 /**
  *  여러 utils
@@ -83,4 +85,19 @@ public class CommonUtil {
         
 		return regDt;
 	}
+
+	/**
+	 * 	이미지 캡션 태그가 여러개일 경우 '|' 구분자로 들어온 xpath를 찾아 수집.
+	 * @param doc
+	 * @param articleImgContXpth
+	 * @return
+	 */
+    public String getImgCont(Document doc, String articleImgContXpth) {
+		String[] captionXpths = articleImgContXpth.split("\\|");
+		StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < captionXpths.length; i++) {
+			sb.append(doc.getElementsByClass(captionXpths[i]).stream().map(v -> v.text()).collect(Collectors.joining("|")));
+		}
+		return sb.toString();
+    }
 }

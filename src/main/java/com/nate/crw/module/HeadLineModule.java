@@ -137,38 +137,44 @@ public class HeadLineModule {
             for (String url : list) {
                 doc = Jsoup.connect(url).get();
 
-                //  PK 구하기
-                String pk_v = new CommonUtil().getEncMD5(url + doc.getElementsByAttributeValue("property", src.getArticleTitleXpth() ).attr("content"));
+                Element checkContNull = doc.getElementById(src.getArticleContXpth());
+                String imgCont = new CommonUtil().getImgCont(doc,src.getArticleImgContXpth());
+                //  내용이 널이 아닌 데이터 수집.
+                //  헤드라인에 정치,사회 아닌 연예,사진,동영상 컨텐츠도 같이 있음.
+                if(checkContNull != null){
+                    //  PK 구하기
+                    String pk_v = new CommonUtil().getEncMD5(url + doc.getElementsByAttributeValue("property", src.getArticleTitleXpth() ).attr("content"));
 
-                //  pk 리스트
-                //  게시 되어 있는지 안되어 있는지 판단하는 기준이 되는 pk를 list로 가지고 있는다.
-                pks.add(pk_v);
+                    //  pk 리스트
+                    //  게시 되어 있는지 안되어 있는지 판단하는 기준이 되는 pk를 list로 가지고 있는다.
+                    pks.add(pk_v);
 
-                //  중복체크 및 게시 시간을 구하기 위해. 해당 pk로 먼저 수집원 데이터 체크.
-                Contents contents = headLineService.findFirstBySiteNmAndArticlePkAndDelYn(SiteName.NATE.toString(), pk_v,"N");
+                    //  중복체크 및 게시 시간을 구하기 위해. 해당 pk로 먼저 수집원 데이터 체크.
+                    Contents contents = headLineService.findFirstBySiteNmAndArticlePkAndDelYn(SiteName.NATE.toString(), pk_v,"N");
 
-                //  중복된 contents는 담지 않음.
-                if(contents == null){
-                    Contents cont = Contents.builder()
-                            .articleCategory(doc.select(src.getArticleCateXpth()).text())
-                            .articleContents(doc.getElementById(src.getArticleContXpth()).text())
-                            .articleImgCaption(doc.getElementsByClass(src.getArticleImgContXpth()).stream().map(v -> v.text()).collect(Collectors.joining("|")))
-                            .articleMediaNm(doc.select(src.getArticleMediaNmXpth()).text())
-                            // 해당 제목과 url의 텍스트를 합쳐서 md5를 구하고 pk로 함.
-                            .articlePk(pk_v)
-                            .articleTitle(doc.getElementsByAttributeValue("property",src.getArticleTitleXpth()).attr("content"))
-                            .articleUrl(url)
-                            .articleWriteDt(new CommonUtil().checkDate(doc.select(src.getArticleWriteDtXpth()).text(),"yyyy-MM-dd HH:mm"))
-                            .articleWriter(doc.select(src.getArticleWriterXpth()).text())
-                            .siteNm(SiteName.NATE.name())
-                            .srcType(area.name())
-                            .delYn("N")
-                            .articlePostStartDt(LocalDateTime.now(ZoneId.of("Asia/Seoul")))
-                            .articleCrwDt(LocalDateTime.now(ZoneId.of("Asia/Seoul")))
-                            .upDt(LocalDateTime.now(ZoneId.of("Asia/Seoul")))
-                            .build();
+                    //  중복된 contents는 담지 않음.
+                    if(contents == null){
+                        Contents cont = Contents.builder()
+                                .articleCategory(doc.select(src.getArticleCateXpth()).text())
+                                .articleContents(doc.getElementById(src.getArticleContXpth()).text())
+                                .articleImgCaption(imgCont)
+                                .articleMediaNm(doc.select(src.getArticleMediaNmXpth()).text())
+                                // 해당 제목과 url의 텍스트를 합쳐서 md5를 구하고 pk로 함.
+                                .articlePk(pk_v)
+                                .articleTitle(doc.getElementsByAttributeValue("property",src.getArticleTitleXpth()).attr("content"))
+                                .articleUrl(url)
+                                .articleWriteDt(new CommonUtil().checkDate(doc.select(src.getArticleWriteDtXpth()).text(),"yyyy-MM-dd HH:mm"))
+                                .articleWriter(doc.select(src.getArticleWriterXpth()).text())
+                                .siteNm(SiteName.NATE.name())
+                                .srcType(area.name())
+                                .delYn("N")
+                                .articlePostStartDt(LocalDateTime.now(ZoneId.of("Asia/Seoul")))
+                                .articleCrwDt(LocalDateTime.now(ZoneId.of("Asia/Seoul")))
+                                .upDt(LocalDateTime.now(ZoneId.of("Asia/Seoul")))
+                                .build();
 
-                    result.add(cont);
+                        result.add(cont);
+                    }
                 }
             }
 
@@ -188,6 +194,9 @@ public class HeadLineModule {
                 int updatePostEndDt  = headLineService.updatePostEndDt(pks,ArticleArea.HOMEHEADLINE.name(),SiteName.NATE.name());
                 log.info("update count end date :: {}" , updatePostEndDt);
             }
+
+            //  정상완료되면 해당 수집원에 정상 처리 update
+            headLineService.updateSuccessComplate(SiteName.NATE.name(),src.getArticleCategory());
 
         } catch (Exception e) {
             e.printStackTrace();

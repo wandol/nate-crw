@@ -2,6 +2,7 @@ package com.nate.crw.service.impl;
 
 import com.nate.crw.domain.Contents;
 import com.nate.crw.domain.Source;
+import com.nate.crw.dto.ArticleArea;
 import com.nate.crw.repository.ContRepository;
 import com.nate.crw.repository.SrcRepository;
 import com.nate.crw.service.HeadLineService;
@@ -38,6 +39,11 @@ public class HeadLineServiceImpl implements HeadLineService {
     @Override
     public Contents findFirstBySiteNmAndArticlePkAndDelYn(String sitem, String pk_v, String n) {
         return contRepository.findFirstBySiteNmAndArticlePkAndDelYn(sitem,pk_v,n);
+    }
+
+    @Override
+    public void updateSuccessComplate(String siteNm, String cateName) {
+        lineSrcRepository.updateSuccessComplate(siteNm, cateName);
     }
 
 
